@@ -1,16 +1,17 @@
 (ns google-drive-api-clj.constants
   (:import
-    (com.google.api.services.drive DriveScopes Drive)
+    (com.google.api.services.drive DriveScopes Drive Drive$Builder)
     (com.google.api.client.googleapis.javanet GoogleNetHttpTransport)
     (com.google.api.client.json.gson GsonFactory)
     (com.google.auth.http HttpCredentialsAdapter)
     (com.google.auth.oauth2 ServiceAccountCredentials)
-    (java.io FileInputStream)))
+    (java.io FileInputStream)
+    (com.google.api.client.json JsonFactory)))
 
 (defonce APPLICATION_NAME "Google Drive Api")
 
 ;;private static final JsonFactory JSON_FACTORY = GsonFactory.getDefaultInstance();
-(defonce JSON_FACTORY (GsonFactory/getDefaultInstance))     ;; CHECK THIS!!!!
+(defonce ^JsonFactory JSON_FACTORY (GsonFactory/getDefaultInstance))     ;; CHECK THIS!!!!
 
 ;;private static final List<String> SCOPES = Arrays.asList(DriveScopes.DRIVE);
 (defonce SCOPES (DriveScopes/DRIVE))
@@ -30,8 +31,8 @@
 (defn ^ServiceAccountCredentials credential-with-scopes
   "Creates a copy of the given credential, with the specified scopes attached.
   `scopes` should be a list or vec of one or more Strings"
-  [^ServiceAccountCredentials cred, scopes]
-  (.createScoped cred (set scopes)))
+  [^ServiceAccountCredentials credentials, scopes]
+  (.createScoped credentials (list scopes)))
 
 (defn default-credential
   "Gets the default credential as configured by the GOOGLE_APPLICATION_CREDENTIALS environment variable
@@ -47,7 +48,24 @@
 ;                .build();
 
 
+(def ^Drive drive-service
+  (-> (Drive$Builder. HTTP_TRANSPORT JSON_FACTORY requestInitializer)
+      (.setApplicationName APPLICATION_NAME)
+      .build))
 
+(defn list-files
+  "List first n files, second argument will be number of file names and file IDs you want to return"
+  []
+  (let [files (-> drive-service
+                  .files
+                  .list
+                  (.setPageSize (int 10))
+                  (.setFields "nextPageToken, files(id, name)")
+                  .execute
+                  .getFiles)]
+    (if (and files (pos? (.size files)))
+      (map (juxt #(.getName %) #(.getId %)) files)
+      "No files or folders found")))
 
-
+(list-files)
 
