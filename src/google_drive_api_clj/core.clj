@@ -14,29 +14,14 @@
   (:gen-class))
 
 
-;// Print the names and IDs for up to 10 files.
-;FileList result = driveService.files().list()
-;.setPageSize(10)
-;.setFields("nextPageToken, files(id, name)")
-;.execute();
-;List<File> files = result.getFiles();
-;if (files == null || files.isEmpty()) {
-;                                       System.out.println("No files found.");
-;                                       } else {
-;                                               System.out.println("Files:");
-;                                               for (File file : files) {
-;                                                          System.out.printf("%s (%s)\n", file.getName(), file.getId());
-;                                                                        }
-;                                               }
-
-
-
-
-
 (defn -main
-  "I don't do a whole lot ... yet."
+  "Main entry function, accepts parameters and behaves accordingly"
   [& args]
-  (println "Hello, World!"))
+  (println (type (first args))))
+
+
+
+
 
 
 
