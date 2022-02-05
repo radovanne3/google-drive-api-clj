@@ -1,0 +1,9 @@
+<component name="libraryTable">
+  <library name="Leiningen: org.apache.tika/tika-core:2.0.0">
+    <CLASSES>
+      <root url="jar://$MAVEN_REPOSITORY$/org/apache/tika/tika-core/2.0.0/tika-core-2.0.0.jar!/" />
+    </CLASSES>
+    <JAVADOC />
+    <SOURCES />
+  </library>
+</component>
