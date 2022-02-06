@@ -1,5 +1,6 @@
 (ns google-drive-api-clj.actions
-  (:require [google-drive-api-clj.constants :refer [drive-service]])
+  (:require [google-drive-api-clj.constants :refer [drive-service]]
+            [pantomime.mime :refer [mime-type-of]])
   (:import (com.google.api.services.drive.model File)
            (com.google.api.client.http FileContent)
            (org.apache.tika Tika)
@@ -8,8 +9,8 @@
 
 (defonce ^File file-metadata (File.))
 (defonce ^Tika tika (Tika.))
-(defonce ^ByteArrayOutputStream output-stream (ByteArrayOutputStream.))
-(defonce ^StringBuilder previous-parents (StringBuilder.))
+
+;; keyword pre PROVERITI
 
 ;; HELPER FUNCTION
 
@@ -32,67 +33,68 @@
                       x) files)))))
 
 ;; RADI PROVERENO
-;; KADA SE VRATIM SA POSLA CU NAMESTITI DA SE PRIKAZUJE I IMA DIREKTORIJUMA(PARENT-a)
+(defn get-id-by-name
+  [name]
+  (first (let [found-data (-> drive-service
+                              .files
+                              .list
+                              (.setQ (str "name contains '" (symbol name) "'"))
+                              (.setSpaces "drive")       ;; CHECK THIS!!!!
+                              (.setFields "nextPageToken, files(id, name)")
+                              (.setPageToken nil)
+                              .execute
+                              .getFiles
+                              )]
+           (if (empty? found-data)
+             (str "No folders/files were found.")
+             (map (fn [x]
+                    (.getId x)) found-data)))))
+
+
+;; RADI PROVERENO
 (defn check-parent-id
   [file-name]
   (let [file-id (get-id-by-name file-name)
         parents (-> drive-service
                     .files
                     (.get file-id)
-                    (.setFields "parents")
-                    .execute)]
+                    (.setFields "id, name, parents")
+                    .execute
+                    .getParents)]
     (map (fn [parent]
-           parent) (.getParents parents))
+           parent) parents)
     ))
 
-;; RADI PROVERENO
-(defn get-id-by-name
-  [name]
-  (first (let [found-data (-> drive-service
-                       .files
-                       .list
-                       (.setQ (str "name contains '" (symbol name) "'"))
-                       (.setSpaces "drive")       ;; CHECK THIS!!!!
-                       (.setFields "nextPageToken, files(id, name)")
-                       (.setPageToken nil)
-                       .execute
-                       .getFiles
-                       )]
-    (if (empty? found-data)
-      (str "No folders/files were found.")
-      (map (fn [x]
-             (.getId x)) found-data)))))
 
 ;; RADI PROVERENO
 (defn create-directory
   "Action function for creating a folder."
   [name]
-  (do (.setName file-metadata name)
-      (.setMimeType file-metadata "application/vnd.google-apps.folder")
-      (let [folder (-> drive-service
-                       .files
-                       (.create file-metadata)
-                       (.setFields "id")
-                       .execute)]
-        (str "Successfully created directory: " name))))
+  (.setName file-metadata name)
+  (.setMimeType file-metadata "application/vnd.google-apps.folder")
+  (let [folder (-> drive-service
+                   .files
+                   (.create file-metadata)
+                   (.setFields "id")
+                   .execute)]
+    (str "Successfully created directory: " name)))
 
 
-;; GOOGLE DRIVE API NE PODRZAVA UPLOAD DIREKTORIJUMA, MORAJU SE NAPRAVITI MANUELNO
-;; RADI, ALI MORA DA SE PAZI KADA SE UPISUJE PATH, MIME-TYPE MORA DA SE PODUDARA SA TIPOVIMA
-;; KOJE GOOGLE API DRIVE PODRZAVA
+;; GOOGLE DRIVE API NE PODRZAVA UPLOAD DIREKTORIJUMA, MORAJU SE NAPRAVITI MANUELNO (OVO NESTO NIJE KAKO TREBA)
+
 (defn upload
   "Action function for uploading a file."
   [name path]
-  (do (.setName file-metadata name)
-      (let [filePath (java.io.File. path)
-            mime-type (.detect tika (java.io.File. path))
-            media-content (FileContent. mime-type filePath)
-            file (-> drive-service
-                     .files
-                     (.create file-metadata media-content)
-                     (.setFields "id")
-                     .execute)]
-        (str "File ID: " (.getId file)))))
+  (.setName file-metadata name)
+  (let [filePath (java.io.File. path)
+        mime-type (.detect tika (java.io.File. path))
+        media-content (FileContent. mime-type filePath)
+        file (-> drive-service
+                 .files
+                 (.create file-metadata media-content)
+                 (.setFields "id")
+                 .execute)]
+    (str "File ID: " (.getId file))))
 
 
 ;; AKO DIREKTORIJUM NE POSTOJI MOZEMO DA GA NAPRAVIMO? lako se napravi, da li nam treba?
@@ -102,32 +104,54 @@
   "Action function for uploading a file or files to directory"
   [directory-name file-name file-path]
   (let [directory-id (get-id-by-name directory-name)]
-    (do (.setName file-metadata file-name)
-        (.setParents file-metadata (Collections/singletonList directory-id))
-        (let [filePath (java.io.File. file-path)
-              mime-type (.detect tika (java.io.File. file-path))
-              media-content (FileContent. mime-type filePath)
-              file (-> drive-service
-                       .files
-                       (.create file-metadata media-content)
-                       (.setFields "id, parents")
-                       .execute)]
-          (str "File ID " (.getId file) " is uploaded to " directory-name "..")))))
+    (.setName file-metadata file-name)
+    (.setParents file-metadata (Collections/singletonList directory-id))
+    (let [filePath (java.io.File. file-path)
+          mime-type (.detect tika (java.io.File. file-path))
+          media-content (FileContent. mime-type filePath)
+          file (-> drive-service
+                   .files
+                   (.create file-metadata media-content)
+                   (.setFields "id, parents")
+                   .execute)]
+      (str "File ID " (.getId file) " is uploaded to " directory-name ".."))))
 
 
+;; RADI PROVERENO
+;; KASNIJE UBACITI CHECK-UP AKO NPR IME ILI ID NE POSTOJE DA IZBACI OBJASNJENJE
+(defn delete
+  "Action function for deleting file or directory."
+  [name]
+  (let [file-id (get-id-by-name name)
+        mime-type (mime-type-of (.getBytes name))]
+    (if (not= file-id \N)
+      (cond
+      (= mime-type "application/vnd.google-apps.folder") (do (-> drive-service
+                        .files
+                        (.delete file-id)
+                        .execute)
+                        (str "Directory /Name? " name " /ID? " file-id " is successfully deleted"))
+      :else (do (-> drive-service
+                    .files
+                    (.delete file-id)
+                    .execute)
+                (str "File /Name? " name " /ID? " file-id " is successfully deleted")))
+      (str "DOESNT EXIST"))))
 
 
-;; PREGLEDATI OVO, ULEPSATI FUNKCIJU
 ;; GDE IH CUVA I KAKO MI DA IZABEREMO MESTO!!!
 ;; GOOGLE DRIVE API NE PODRZAVA SKIDANJE DIREKTORIJUMA, SAMO FAJLOVA
-;; PRVI DEO "DO" FUNKCIJE SE IZVRSAVA BEZ GRESKE.....
+;; NE RADI? FAJL MORA DA IMA KONTENT DA BI MOGAO DA SE SKINE
 (defn download
   [name]
-  (do (= true (-> drive-service
-                  .files
-                  (.get (get-id-by-name name))
-                  (.executeMediaAndDownloadTo output-stream)))
-      (str "File named " name " is successfully downloaded") ))
+  (let [output-stream (new ByteArrayOutputStream)
+        file-id (get-id-by-name name)]
+    (-> drive-service
+      .files
+      (.get file-id)
+      (.executeMediaAndDownloadTo output-stream))
+  (str "File named " name " is successfully downloaded")))
+
 
 
 ;; RADI PROVERENO, ZELIM DA PREPOZNA DA LI JE FAJL ILI DIREKTORIJUM KADA SE "SVE" IZLISTAVA
@@ -145,15 +169,9 @@
        (println "No directories/files were found.")
        (map (fn [x]
               (let [file-name (.getName x)
-                    file-id (.getId x)
-                    #_mime-type #_(URLConnection/guessContentTypeFromStream (BufferedInputStream. x))]
-                (str "Directory/File name: " (.getName x) " / "
-                     "Directory/File ID: " (.getId x) " ... " )
-                #_(if (= mime-type "application/vnd.google-apps.file")
-                  (str "File name: " file-name " / "
-                       "File ID: " file-id " ... " )
-                  (str "Folder name: " file-name " / "
-                       "Folder ID: " file-id " ... " )))) files))))
+                    file-id (.getId x)]
+                (str "Directory/File name: " file-name " / "
+                     "Directory/File ID: " file-id " ... " ))) files))))
   ([type]
   (case type
     "directories" (let [directories (-> drive-service
@@ -193,11 +211,27 @@
 ;; RADI PROVERENO, PRETRAGA POMOCU IMENA, MOGU SE DODATI JOS 16 NACINA (KOJI NAM TREBAJU?)
 (defn search-for
   "Action function for searching specific file or folder"
-  [name]
-  (let [found-data (-> drive-service
+  [type name]
+  (case type
+    "file" (let [found-data (-> drive-service
+                                .files
+                                .list
+                                (.setQ (str "name contains '" (symbol name) "' and mimeType != 'application/vnd.google-apps.folder'"))
+                                (.setSpaces "drive")       ;; CHECK THIS!!!!
+                                (.setFields "nextPageToken, files(id, name)")
+                                (.setPageToken nil)
+                                .execute
+                                .getFiles
+                                )]
+             (if (empty? found-data)
+               (str "No directories were found.")
+               (map (fn [x]
+                      (str "File name: " (.getName x) " / "
+                           "File ID: " (.getId x) " ... " )) found-data)))
+    "directory" (let [found-data (-> drive-service
                        .files
                        .list
-                       (.setQ (str "name contains '" (symbol name) "'"))
+                       (.setQ (str "name contains '" (symbol name) "' and mimeType = 'application/vnd.google-apps.folder'"))
                        (.setSpaces "drive")       ;; CHECK THIS!!!!
                        (.setFields "nextPageToken, files(id, name)")
                        (.setPageToken nil)
@@ -205,10 +239,10 @@
                        .getFiles
                        )]
     (if (empty? found-data)
-      (str "No directories/files were found.")
+      (str "No directories were found.")
       (map (fn [x]
-             (str "Directory/File name: " (.getName x) " / "
-                  "Directory/File ID: " (.getId x) " ... " )) found-data))))
+             (str "Directory name: " (.getName x) " / "
+                  "Directory ID: " (.getId x) " ... " )) found-data)))))
 
 ;; RADI, PROVERENO
 (defn move-file
@@ -216,27 +250,23 @@
   [file-name new-dir-name]
   (let [file-id (get-id-by-name file-name)
         dir-id (get-id-by-name new-dir-name)
+        ^StringBuilder previous-parents (StringBuilder.)
         old-dir (-> drive-service
                     .files
                     (.get file-id)
                     (.setFields "parents")
                     .execute)
         ]
-    (do (map (fn [parent]
-               (do (.append previous-parents parent)
-                   (.append previous-parents ","))) (.getParents old-dir))
-        (-> drive-service
-            .files
-            (.update file-id nil)
-            (.setAddParents dir-id)
-            (.setRemoveParents (str previous-parents))
-            (.setFields "id, parents")
-            .execute))))
-
-
-
-
-
+    (map (fn [parent]
+           (.append previous-parents parent)
+           (.append previous-parents ",")) (.getParents old-dir))
+    (-> drive-service
+        .files
+        (.update file-id nil)
+        (.setAddParents dir-id)
+        (.setRemoveParents (str previous-parents))
+        (.setFields "id, parents")
+        .execute)))
 
 
 

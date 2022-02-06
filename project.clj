@@ -8,6 +8,8 @@
                  [com.google.api-client/google-api-client "1.33.1"]
                  [com.google.apis/google-api-services-drive "v3-rev20220110-1.32.1"]
                  [org.apache.tika/tika-core "2.0.0"]
+                 [com.novemberain/pantomime "2.10.0"]
+                 [org.apache.commons/commons-compress "1.21"]
                  ]
   :main ^:skip-aot google-drive-api-clj.core
   :target-path "target/%s"

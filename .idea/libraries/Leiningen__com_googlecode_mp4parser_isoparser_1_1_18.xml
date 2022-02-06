@@ -1,0 +1,9 @@
+<component name="libraryTable">
+  <library name="Leiningen: com.googlecode.mp4parser/isoparser:1.1.18">
+    <CLASSES>
+      <root url="jar://$MAVEN_REPOSITORY$/com/googlecode/mp4parser/isoparser/1.1.18/isoparser-1.1.18.jar!/" />
+    </CLASSES>
+    <JAVADOC />
+    <SOURCES />
+  </library>
+</component>

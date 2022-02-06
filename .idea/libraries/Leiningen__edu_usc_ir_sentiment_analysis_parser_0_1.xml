@@ -1,0 +1,9 @@
+<component name="libraryTable">
+  <library name="Leiningen: edu.usc.ir/sentiment-analysis-parser:0.1">
+    <CLASSES>
+      <root url="jar://$MAVEN_REPOSITORY$/edu/usc/ir/sentiment-analysis-parser/0.1/sentiment-analysis-parser-0.1.jar!/" />
+    </CLASSES>
+    <JAVADOC />
+    <SOURCES />
+  </library>
+</component>
