@@ -11,13 +11,18 @@
            [java.security GeneralSecurityException]
            [java.util Arrays List]            ;; find replacement
            )
+  (:require [google-drive-api-clj.actions :refer :all])
   (:gen-class))
 
 
 (defn -main
   "Main entry function, accepts parameters and behaves accordingly"
   [& args]
-  (println (type (first args))))
+  (case (nth args 0)
+    "create-directory" (if (nil? (second args))
+                         (println "Cant invoke function whitout arguments.
+           Please refer to supplied documentation for further instructions.")
+                        (create-directory (nth args 1)))))
 
 
 
