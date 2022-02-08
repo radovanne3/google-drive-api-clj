@@ -30,11 +30,12 @@
                          .getFiles
                          )]
       (if (empty? found-data)
-        nil
-        found-data))
+        {:error :not-found}
+        (first found-data)))
     {:error "Error"
      :error-code :invalid-parameters})
   )
+
 
 
 (defn get-data-using-id
@@ -85,7 +86,6 @@
                  (.create file-metadata media-content)
                  (.setFields "id, name")
                  .execute)]
-      (println file)
       (str "File Name: " (.getName file) " / " "File ID: " (.getId file)))
     "Please provide required arguments in this order:
      file-name
@@ -98,7 +98,7 @@
   In case that directory doesn't exist this function will create one with the given name
   and upload file to it.."
   [directory-name file-name file-path]
-  (if (and (not (nil? directory-name)) (not (nil? file-name)) (not (nil? file-path)))
+  (if (and (string? directory-name) (string? file-name) (string? file-path))
     (if (string? (get (get-metadata-by-name directory-name :partial) "id"))
       (let [file-metadata (File.)
             directory-id (get (get-metadata-by-name directory-name :partial) "id")]
@@ -129,22 +129,24 @@
   (if (string? name)
     (let [file-id (get (get-metadata-by-name name :exact) "id")
         mime-type (get (get-metadata-by-name name :exact) "mimeType")]
-    (if (not (nil? file-id))
+    (if (string? file-id)
       (cond
       (= mime-type "application/vnd.google-apps.folder")
             (do (-> drive-service
                         .files
                         (.delete file-id)
                         .execute)
-                        (str "Directory /Name? " name " /ID? " file-id " is successfully deleted"))
+                        (str "Directory " name "
+                              ID " file-id " is successfully deleted"))
       :else (do (-> drive-service
                     .files
                     (.delete file-id)
                     .execute)
                 (str "File " name "
                       ID: " file-id " is successfully deleted")))
-      "The name you provided doesn't match with any directory or file.")))
-  "Please provide name of the directory or file you wish to delete.")
+      "The name you provided doesn't match with any directory or file."))
+    "Please provide name of the directory or file you wish to delete."))
+
 
 
 ;;KAKO MI DA IZABEREMO MESTO?
@@ -160,102 +162,52 @@
     (println output-stream)
   (str "File named " name " is successfully downloaded"))
     "The name you provided doesn't match any directory or file."))
+(get (get-metadata-by-name "name" :partial) "name")
 
 
+(defn search
+  "Action function for listing files, folders, files and folders or specific file or folder."
+  [type & name]
+  (let [return-value (fn
+                       ([data] (if (empty? data)
+                                  (str "No " type " were found.")
+                                  (map (fn [x]
+                                         (str (clojure.string/capitalize type) "  name: " (.getName x) " / "
+                                              (clojure.string/capitalize type) " ID: " (.getId x) " ... " )) data))))
 
-(defn list-all
-  "Action function for listing folders or files and folders."
-  ([]
-   (let [files (-> drive-service
-                   .files
-                   .list
-                   (.setFields "nextPageToken, files(id, name)")
-                   .execute
-                   .getFiles)]
-     (if (empty? files)
-       (println "Storage is empty.")
-       (map (fn [x]
-              (let [file-name (.getName x)
-                    file-id (.getId x)]
-                {:file-name file-name
-                 :file-id file-id}
-                )) files))))
-  ([type]
-  (case type
-    "directories" (let [directories (-> drive-service
-                                        .files
-                                        .list
-                                        (.setQ "mimeType = 'application/vnd.google-apps.folder'")
-                                        (.setSpaces "drive")       ;; CHECK THIS!!!!
-                                        (.setFields "nextPageToken, files(id, name)")
-                                        (.setPageToken nil)
-                                        .execute
-                                        .getFiles
-                                        )]
-                    (if (empty? directories)
-                      (str "No directories were found.")
-                      (map (fn [x]
-                             (str "Directory name: " (.getName x) " / "
-                                  "Directory ID: " (.getId x) " ... " )) directories)))
+        condition-for-query (cond
+                    (= type "directories") (str "mimeType = 'application/vnd.google-apps.folder'")
+                    (= type "files") (str "mimeType != 'application/vnd.google-apps.folder'")
+                    (and (string? name) (= type "files")) (str "name contains '" (symbol name) "' and mimeType != 'application/vnd.google-apps.folder'")
+                    (and (string? name) (= type "directories")) (str "name contains '" (symbol name) "' and mimeType = 'application/vnd.google-apps.folder'")
+               )]
+    (case type
+      "files" (let [found-data (-> drive-service
+                                   .files
+                                   .list
+                                   (.setQ condition-for-query)
+                                   (.setSpaces "drive")       ;; CHECK THIS!!!!
+                                   (.setFields "nextPageToken, files(id, name)")
+                                   (.setPageToken nil)
+                                   .execute
+                                   .getFiles
+                                   )]
+                (return-value found-data)
+                )
+      "directories" (let [found-data (-> drive-service
+                                         .files
+                                         .list
+                                         (.setQ condition-for-query)
+                                         (.setSpaces "drive")       ;; CHECK THIS!!!!
+                                         (.setFields "nextPageToken, files(id, name)")
+                                         (.setPageToken nil)
+                                         .execute
+                                         .getFiles
+                                         )]
+                      (return-value found-data))
+      "Provided argument doesn't meet search requirements, try to search for files or directories.")))
 
-    "files" (let [files (-> drive-service
-                                        .files
-                                        .list
-                                        (.setQ "mimeType != 'application/vnd.google-apps.folder'")
-                                        (.setSpaces "drive")       ;; CHECK THIS!!!!
-                                        (.setFields "nextPageToken, files(id, name)")
-                                        (.setPageToken nil)
-                                        .execute
-                                        .getFiles
-                                        )]
-                    (if (empty? files)
-                      (str "No files were found.")
-                      (map (fn [x]
-                             (str "File name: " (.getName x) " / "
-                                  "File ID: " (.getId x) " ... " )) files)))
-    "Provided argument doesn't meet search requirements, try to search for files or directories."
-
-    )))
-
-
-;; ZNAM KAKO CU OVO DA ISPRAVIM...
-(defn search-for
-  "Action function for searching specific file or folder,
-  first argument is type (?file or directory) second is file-look-up-name (?text.txt)"
-  [type name]
-  (case type
-    "file" (let [found-data (-> drive-service
-                                .files
-                                .list
-                                (.setQ (str "name contains '" (symbol name) "' and mimeType != 'application/vnd.google-apps.folder'"))
-                                (.setSpaces "drive")       ;; CHECK THIS!!!!
-                                (.setFields "nextPageToken, files(id, name)")
-                                (.setPageToken nil)
-                                .execute
-                                .getFiles
-                                )]
-             (if (empty? found-data)
-               (str "No files were found.")
-               (map (fn [x]
-                      (str "File name: " (.getName x) " / "
-                           "File ID: " (.getId x) " ... " )) found-data)))
-    "directory" (let [found-data (-> drive-service
-                       .files
-                       .list
-                       (.setQ (str "name contains '" (symbol name) "' and mimeType = 'application/vnd.google-apps.folder'"))
-                       (.setSpaces "drive")       ;; CHECK THIS!!!!
-                       (.setFields "nextPageToken, files(id, name)")
-                       (.setPageToken nil)
-                       .execute
-                       .getFiles
-                       )]
-    (if (empty? found-data)
-      (str "No directories were found.")
-      (map (fn [x]
-             (str "Directory name: " (.getName x) " / "
-                  "Directory ID: " (.getId x) " ... " )) found-data)))
-    "Provided argument doesn't meet search requirements, try to search for files or directories."))
-
+(search "files" "asdas")
 
 ;; Da li i ovde zelimo da pravimo direktorijum ako vec ne postoji?
 (defn move-file
@@ -284,6 +236,8 @@
         (.setFields "id, parents")
         .execute))
     "Argument (file name) or (new directory name) don't exist."))
+
+
 
 
 
