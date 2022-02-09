@@ -307,18 +307,23 @@
   "Search files by content"
   [exact & args]
   (let [search-query (cond
-                       (and (> (count args) 0) (= exact :exact)) (str "fullText contains " "'\""(clojure.string/join " " args)"\"'")
-                       (and (> (count args) 0)(= exact :not-exact)) (clojure.string/join " and " (for [x args]
+                       (and (> (count args) 0) (= exact :full-text)) (str "fullText contains " "'\""(clojure.string/join " " args)"\"'")
+                       (and (> (count args) 0)(= exact :contains-every)) (clojure.string/join " and " (for [x args]
                                                           (reduce str ["fullText contains " "'"(symbol x)"'"])))
+                       (and (> (count args) 0) (= exact :contains-any)) (clojure.string/join " or " (for [x args]
+                                                                                                       (reduce str ["fullText contains " "'"(symbol x)"'"])))
                        :else {:error "Argument provided doesn't exist, try to specify if your search must be :exact or :not-exact,
                         and specify what words are you looking for."})]
     search-query)
   )
 
+
 #_(search (by-type type))                                   ;; SVE FAJLOVE
 #_(search (by-type type name))                              ;; FAJL ODREDJENOG IMENA
-#_(search (by-content :exact params))                       ;; SVI PARAMETRI CE SE SPOJITI U JEDNU RECENICU
-#_(search (by-content :not-exact params))                   ;; FAJL MORA DA SADRZI PARAMS, PARAMS MOGU BITI RAZBACANI PO FAJLU
+#_(search (by-content :full-text params))                   ;; SVI PARAMETRI CE SE SPOJITI U JEDNU RECENICU KOJU FAJL MORA DA SADRZI
+#_(search (by-content :contains-any params))                ;; SVE FAJLOVE KOJI SADRZE BAR JEDNU REC IZ PARAMETARA
+#_(search (by-content :contains-every params))              ;; SVE FAJLOVE KOJI SADRZE SVE PARAMETRE RAZBACANE PO TEKSTU FAJLA
+
 
 
 (defn move-file
