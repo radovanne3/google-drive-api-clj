@@ -67,10 +67,11 @@
                    (.create file-metadata)
                    (.setFields "id, name")
                    .execute)]
-    (println (str "Successfully created directory:
+            (str "Successfully created directory:
     ID:  " (get directory "id") "
-    NAME:  " (get directory "name")))))
+    NAME:  " (get directory "name"))))
     (println "Please provide required argument 'directory-name'.")))
+
 
 
 (defn upload
@@ -90,6 +91,60 @@
     "Please provide required arguments in this order:
      file-name
      absolute-path-to-the-file"))
+
+#_(defn update-name
+  "Update file name"
+  [old-name new-name]
+  (if (and (string? old-name) (string? new-name))
+    (let [file-id (get (get-metadata-by-name old-name :exact) "id")
+          mime-type (get (get-metadata-by-name old-name :exact) "mimeType")
+          file-metadata (.setName (File.) new-name)]
+      (if (string? file-id)
+        (cond
+          (= mime-type "application/vnd.google-apps.folder")
+          (do (-> drive-service
+                  .files
+                  (.update file-id file-metadata)
+                  .execute)
+              (str "Directory's new name is " new-name "
+                              ID " file-id))
+          :else (do (-> drive-service
+                        .files
+                        (.update file-id file-metadata)
+                        .execute)
+                    (str "File's new name is " new-name "
+                      ID: " file-id )))
+        "The name you provided doesn't match with any directory or file."))
+    "Please provide name of the directory or file you wish to delete.")
+  )
+
+#_(update-name "file-with-text" "new-file-name")
+
+(defn update-name
+  "Action function for changing metadata (name) of a file or directory"
+  [old-name new-name]
+  (if (string? new-name)
+    (let [id (get (get-metadata-by-name old-name :exact) "id")
+          mime-type (get (get-metadata-by-name old-name :exact) "mimeType")
+          file-metadata (.setName (File.) new-name)]
+      (if (string? id)
+        (cond
+          (= mime-type "application/vnd.google-apps.folder")
+          (do (-> drive-service
+                  .files
+                  (.update id file-metadata)
+                  .execute)
+              (str "Directory's new name is " new-name "
+                              ID " id))
+          :else (do (-> drive-service
+                        .files
+                        (.update id file-metadata)
+                        .execute)
+                    (str "File's new name is " new-name "
+                      ID: " id )))
+        "The name you provided doesn't match with any directory or file."))
+    "Please provide valid new name."))
+
 
 
 
@@ -148,7 +203,6 @@
     "Please provide name of the directory or file you wish to delete."))
 
 
-
 ;;KAKO MI DA IZABEREMO MESTO?
 (defn download
   [name]
@@ -165,15 +219,10 @@
 (get (get-metadata-by-name "name" :partial) "name")
 
 
-(defn search
+#_(defn search
   "Action function for listing files, folders, files and folders or specific file or folder."
-  [type & name]
-  (let [return-value (fn
-                       ([data] (if (empty? data)
-                                  (str "No " type " were found.")
-                                  (map (fn [x]
-                                         (str (clojure.string/capitalize type) "  name: " (.getName x) " / "
-                                              (clojure.string/capitalize type) " ID: " (.getId x) " ... " )) data))))
+  [type & [name]]
+  (let [return-value
 
         condition-for-query (cond
                     (= type "directories") (str "mimeType = 'application/vnd.google-apps.folder'")
@@ -207,9 +256,76 @@
                       (return-value found-data))
       "Provided argument doesn't meet search requirements, try to search for files or directories.")))
 
-(search "files" "asdas")
 
-;; Da li i ovde zelimo da pravimo direktorijum ako vec ne postoji?
+;; NOVI NACIN PRETRAGE
+;; search-u se dodaje nacin pretrage
+(defn search
+  "Search"
+  [command]
+  (let [data (fn [condition]
+                       (-> drive-service
+                                     .files
+                                     .list
+                                     (.setQ condition)
+                                     (.setSpaces "drive")
+                                     (.setFields "nextPageToken, files(id, name, mimeType)")
+                                     (.setPageToken nil)
+                                     .execute
+                                     .getFiles
+                                     ))
+        return-value (fn
+                       ([data] (let [type (fn [x] (cond
+                                                    (= x "application/vnd.google-apps.folder") "Folder"
+                                                    :else "File"))]
+                                 (cond
+                                 (empty? data) (str "No data was found.")
+                                 :else (map (fn [x]
+                                                    (str (clojure.string/capitalize (type (.getMimeType x))) "  name: " (.getName x) " / "
+                                                         (clojure.string/capitalize (type (.getMimeType x))) " ID: " (.getId x) " ... " )
+                                                           ) data)
+                                  ))))]
+    (if (string? command)
+      (return-value (data command))
+      (:error command))))
+
+(defn by-type
+  "Search files and folders by type"
+  ([type]
+  (let [search-query (cond
+                       (= type "folders") (str "mimeType = 'application/vnd.google-apps.folder'")
+                       (= type "files") (str "mimeType != 'application/vnd.google-apps.folder'")
+                       :else {:error "Argument provided doesn't exist, try with files or folders"})]
+    search-query))
+  ([type name]
+   (let [search-query (cond
+                        (= type "folders") (str "name = '" (symbol name) "' and mimeType = 'application/vnd.google-apps.folder'")
+                        (= type "files") (str "name = '" (symbol name) "' and mimeType != 'application/vnd.google-apps.folder'")
+                        :else {:error "Argument provided doesn't exist, try with files or folders"})]
+     search-query)))
+
+(defn by-content
+  "Search files by content"
+  [exact & args]
+  (let [search-query (cond
+                       (and (> (count args) 0) (= exact :full-text)) (str "fullText contains " "'\""(clojure.string/join " " args)"\"'")
+                       (and (> (count args) 0)(= exact :contains-every)) (clojure.string/join " and " (for [x args]
+                                                          (reduce str ["fullText contains " "'"(symbol x)"'"])))
+                       (and (> (count args) 0) (= exact :contains-any)) (clojure.string/join " or " (for [x args]
+                                                                                                       (reduce str ["fullText contains " "'"(symbol x)"'"])))
+                       :else {:error "Argument provided doesn't exist, try to specify if your search must be :exact or :not-exact,
+                        and specify what words are you looking for."})]
+    search-query)
+  )
+
+
+#_(search (by-type type))                                   ;; SVE FAJLOVE
+#_(search (by-type type name))                              ;; FAJL ODREDJENOG IMENA
+#_(search (by-content :full-text params))                   ;; SVI PARAMETRI CE SE SPOJITI U JEDNU RECENICU KOJU FAJL MORA DA SADRZI
+#_(search (by-content :contains-any params))                ;; SVE FAJLOVE KOJI SADRZE BAR JEDNU REC IZ PARAMETARA
+#_(search (by-content :contains-every params))              ;; SVE FAJLOVE KOJI SADRZE SVE PARAMETRE RAZBACANE PO TEKSTU FAJLA
+
+
+
 (defn move-file
   "Action function for moving file from one directory to another..
   First argument is name of the file we want to move and second is new directory name"
@@ -236,8 +352,6 @@
         (.setFields "id, parents")
         .execute))
     "Argument (file name) or (new directory name) don't exist."))
-
-
 
 
 
