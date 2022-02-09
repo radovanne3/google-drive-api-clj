@@ -120,6 +120,33 @@
 
 #_(update-name "file-with-text" "new-file-name")
 
+(defn update-name
+  "Action function for changing metadata (name) of a file or directory"
+  [old-name new-name]
+  (if (string? new-name)
+    (let [id (get (get-metadata-by-name old-name :exact) "id")
+          mime-type (get (get-metadata-by-name old-name :exact) "mimeType")
+          file-metadata (.setName (File.) new-name)]
+      (if (string? id)
+        (cond
+          (= mime-type "application/vnd.google-apps.folder")
+          (do (-> drive-service
+                  .files
+                  (.update id file-metadata)
+                  .execute)
+              (str "Directory's new name is " new-name "
+                              ID " id))
+          :else (do (-> drive-service
+                        .files
+                        (.update id file-metadata)
+                        .execute)
+                    (str "File's new name is " new-name "
+                      ID: " id )))
+        "The name you provided doesn't match with any directory or file."))
+    "Please provide valid new name."))
+
+
+
 
 (defn upload-to-directory
   "Action function for uploading a file to directory.
@@ -320,8 +347,6 @@
         (.setFields "id, parents")
         .execute))
     "Argument (file name) or (new directory name) don't exist."))
-
-
 
 
 
