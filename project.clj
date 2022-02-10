@@ -7,9 +7,11 @@
                  [com.google.auth/google-auth-library-oauth2-http "1.4.0"]
                  [com.google.api-client/google-api-client "1.33.1"]
                  [com.google.apis/google-api-services-drive "v3-rev20220110-1.32.1"]
-                 [org.apache.tika/tika-core "2.0.0"]
+                 [clj-tika "1.2.0"]                         ;; check this
                  [com.novemberain/pantomime "2.10.0"]
-                 [org.apache.commons/commons-compress "1.21"]
+                 [org.clojure/tools.cli "1.0.206"]
+                 [org.slf4j/slf4j-api "2.0.0-alpha6"]
+                 [org.slf4j/slf4j-jdk14 "2.0.0-alpha6"]
                  ]
   :main ^:skip-aot google-drive-api-clj.core
   :target-path "target/%s"
