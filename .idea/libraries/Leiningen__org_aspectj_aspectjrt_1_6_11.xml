@@ -1,0 +1,9 @@
+<component name="libraryTable">
+  <library name="Leiningen: org.aspectj/aspectjrt:1.6.11">
+    <CLASSES>
+      <root url="jar://$MAVEN_REPOSITORY$/org/aspectj/aspectjrt/1.6.11/aspectjrt-1.6.11.jar!/" />
+    </CLASSES>
+    <JAVADOC />
+    <SOURCES />
+  </library>
+</component>
