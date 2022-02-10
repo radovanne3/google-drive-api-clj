@@ -237,7 +237,7 @@
                                                       :else "File"))]
                                    (cond
                                      (empty? data) {:error-code :not-found
-                                                    :error      (str "No data was found.")}
+                                                    :error      "No data was found."}
                                      :else (map (fn [x]
                                                   {:success         true
                                                    :success-message (str (clojure.string/capitalize (type (.getMimeType x))) "  name: " (.getName x) " / "
