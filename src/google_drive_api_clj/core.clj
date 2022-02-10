@@ -14,11 +14,8 @@
         options (:options arguments)]
     (if (:help options)
       (println (:summary arguments))
-      (let [result (search (by-type "files"))]
-        (for [r result]
-          (println r))))))
+      (println (search (by-type "files" "text1"))))))
 
-(-main)
 
 
 
