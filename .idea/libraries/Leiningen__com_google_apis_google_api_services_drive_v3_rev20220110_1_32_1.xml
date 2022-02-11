@@ -1,9 +1,0 @@
-<component name="libraryTable">
-  <library name="Leiningen: com.google.apis/google-api-services-drive:v3-rev20220110-1.32.1">
-    <CLASSES>
-      <root url="jar://$MAVEN_REPOSITORY$/com/google/apis/google-api-services-drive/v3-rev20220110-1.32.1/google-api-services-drive-v3-rev20220110-1.32.1.jar!/" />
-    </CLASSES>
-    <JAVADOC />
-    <SOURCES />
-  </library>
-</component>
