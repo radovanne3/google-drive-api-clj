@@ -1,7 +1,8 @@
 (ns google-drive-api-clj.actions
   (:require [google-drive-api-clj.constants :refer [drive-service]]
             [pantomime.mime :refer [mime-type-of]]
-            [clojure.java.io :as io])
+            [clojure.java.io :as io]
+            [clojure.pprint :as p])
   (:import (com.google.api.services.drive.model File)
            (com.google.api.client.http FileContent)
            (java.util Collections)))
@@ -36,9 +37,6 @@
     {:error      "File name exactly matching provided name was not found in your drive"
      :error-code :not-found}))
 
-;(get-metadata-by-name "asdasd" :exact)
-;(get-metadata-by-name nil :partial)
-;(get-metadata-by-name "new" :exact)
 
 (defn get-data-using-id
   [id]
@@ -71,9 +69,6 @@
     {:error      "You must provide name for new directory"
      :error-code :not-found}))
 
-;(create-directory nil)
-;(create-directory "new-test-dir")
-
 (defn upload
   "Action function for uploading a file."
   [name path]
@@ -95,9 +90,6 @@
      file-name
      absolute-path-to-the-file"}))
 
-;(upload nil "/home/snorlax/Desktop/file-with-text")
-;(upload "test" nil)
-;(upload "test" "/home/snorlax/Desktop/file-with-text")
 
 (defn update-name
   "Action function for changing metadata (name) of a file or directory"
@@ -123,9 +115,6 @@
     {:error-code :not-found
      :error      "Please provide valid new name."}))
 
-;(update-name nil "new-file-name")
-;(update-name "test" nil)
-;(update-name "new" "new-test-123")
 
 (defn upload-to-directory
   "Action function for uploading a file to directory.
@@ -159,12 +148,6 @@
      file-name
      absolute-path-to-the-file"}))
 
-;(upload-to-directory nil "upd" "home/snorlax/Desktop/file-with-text")
-;(upload-to-directory "upd-dir" nil "home/snorlax/Desktop/file-with-text")
-;(upload-to-directory "upd-dir" "upd" nil)
-;(upload-to-directory "def-not-exist-123456" "upd" "/home/snorlax/Desktop/file-with-text")
-;(upload-to-directory "upd-dir" "upd1234" "/home/snorlax/Desktop/file-with-text")
-
 
 (defn delete
   "Action function for deleting file or directory."
@@ -194,9 +177,6 @@
     {:error-code :not-found
      :error      "Please provide name of the directory or file you wish to delete."}))
 
-;(delete nil)
-;(delete "asdasdas")
-;(delete "upd-dir")
 
 (defn download
   [name]
@@ -213,9 +193,6 @@
      :error      "The name you provided doesn't match any directory or file."}))
 (get (get-metadata-by-name "name" :partial) "name")
 
-;(download nil)
-;(download "asdanil")
-;(download "new")
 
 (defn search
   "Search"
@@ -267,7 +244,7 @@
 
 (defn by-content
   "Search files by content"
-  [level & args]
+  [level args]
   (let [search-query (cond
                        (and (> (count args) 0) (= level :full-text)) (str "fullText contains " "'\"" (clojure.string/join " " args) "\"'")
                        (and (> (count args) 0) (= level :contains-every)) (clojure.string/join " and " (for [x args]
@@ -279,38 +256,6 @@
                         and specify what words are you looking for."})]
     search-query))
 
-(defn search-by-type
-  ([{type :t :as _arguments}]
-   (println (search (by-type type))))
-  ([type name]
-   (search (by-type type))))
-
-
-(defn search-by-content
-  [level & args]
-  (search (by-content level args)))
-
-
-
-
-;(search nil)
-;(search "asdasdas")
-;(search (by-type nil))
-;(search (by-type "files"))
-;(search (by-type "files" "new-file-1234"))
-;(search (by-type "directories"))
-;(search (by-type "directories" "test-for-return"))
-;(search (by-content nil))
-;(search (by-content "something"))
-;(search (by-content :full-text "something"))
-;(search (by-content :full-text "SOME"))
-
-
-#_(search (by-type type))                                   ;; SVE FAJLOVE
-#_(search (by-type type name))                              ;; FAJL ODREDJENOG IMENA
-#_(search (by-content :full-text params))                   ;; SVI PARAMETRI CE SE SPOJITI U JEDNU RECENICU KOJU FAJL MORA DA SADRZI
-#_(search (by-content :contains-any params))                ;; SVE FAJLOVE KOJI SADRZE BAR JEDNU REC IZ PARAMETARA
-#_(search (by-content :contains-every params))              ;; SVE FAJLOVE KOJI SADRZE SVE PARAMETRE RAZBACANE PO TEKSTU FAJLA
 
 
 
@@ -343,11 +288,68 @@
     {:error-code :not-found
      :error      "Argument (file name) or (new directory name) don't exist."}))
 
-;(move-file nil nil)
-;(move-file nil "test-dir-2")
-;(move-file "adasda" "test-dir-2")
-;(move-file "new" "test-dir-2")
-;(move-file "new" nil)
+
+
+;; callings for cli-matic
+
+(defn del
+  [{name :n :as _arguments}]
+  "DELETE"
+  (p/pprint (delete name)))
+
+
+(defn search-by-type
+  ([{file-name :n :as _arguments}]
+   (if file-name
+     (p/pprint (search (by-type (:t _arguments) (:n _arguments))))
+     (p/pprint (search (by-type (:t _arguments)))))))
+
+(defn upl
+  "UPLOAD"
+  [_arguments]
+  (p/pprint (upload (:n _arguments) (:p _arguments))))
+
+(defn mo-fi
+  "MOVE FILE"
+  [_arguments]
+  (p/pprint (move-file (:n _arguments) (:d _arguments))))
+
+;;Exception: #error {
+; :cause no conversion to symbol
+; :via
+; [{:type java.lang.IllegalArgumentException
+;   :message no conversion to symbol
+;   :at [clojure.core$symbol invokeStatic core.clj 598]}]
+(defn search-by-content
+  [_arguments]
+  (p/pprint (search (by-content (:l _arguments) (:_arguments _arguments)))))
+
+(defn dload
+  "DOWNLOAD"
+  [{name :n :as _arguments}]
+  (p/pprint (download name)))
+
+(defn c-dir
+  "CREARE DIRECTORY"
+  [{name :n :as _arguments}]
+  (p/pprint (create-directory name)))
+
+(defn up-to-dir
+  "UPLOAD TO DIRECTPRY"
+  [_arguments]
+  (p/pprint (upload-to-directory (:d _arguments) (:n _arguments) (:p _arguments))))
+
+(defn upd-name
+  "UPDATE NAME"
+  [_arguments]
+  (p/pprint (update-name (:o _arguments) (:n _arguments))))
+
+
+
+
+
+
+
 
 
 

@@ -1,5 +1,5 @@
 (defproject google-drive-api-clj "0.1.0-SNAPSHOT"
-  :description "FIXME: write description"
+  :description "Hello people, this is a simple to use command line application for working with Google Drive."
   :url "http://example.com/FIXME"
   :license {:name "EPL-2.0 OR GPL-2.0-or-later WITH Classpath-exception-2.0"
             :url "https://www.eclipse.org/legal/epl-2.0/"}
@@ -18,6 +18,9 @@
                  [cli-matic "0.4.3"]
                  [org.clojure/tools.cli "1.0.206"]
                  ]
+  ;; Prevent Leiningen from checking the network for dependencies.
+  ;; This wouldn't normally be set in project.clj; it would come from a profile.
+  :offline? true
   :main ^:skip-aot google-drive-api-clj.core
   :target-path "target/%s"
   :profiles {:uberjar {:aot :all

@@ -1,6 +1,6 @@
 # google-drive-api-clj
 
-FIXME: description
+Hello people, this is a simple to use command line application for working with Google Drive.
 
 ## Installation
 
@@ -8,14 +8,23 @@ Download from http://example.com/FIXME.
 
 ## Usage
 
-FIXME: explanation
+Install application:
 
     $ java -jar google-drive-api-clj-0.1.0-standalone.jar [args]
 
 ## Options
 
-FIXME: listing of options this app accepts.
+Here we will list all methods this application has to offer:
+1. Search trough Shared Google Drive by term's.
+2. Create new directory on Google Drive.
+3. Upload file to a root directory of Google Drive or to a specific
+directory of your choice.
+4. Move file from one to another directory.
+5. Download file from Google Drive.
+6. Delete a file or directory.
+7. Update name of the file or directory
 
+In the EXAMPLES part of the page you will have details about all methods.
 ## Examples
 
 ...
