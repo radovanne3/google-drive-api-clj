@@ -248,7 +248,6 @@
     {:error-code :not-found
      :error      "Please provide valid criteria for searching.."}))
 
-
 (defn by-type
   "Search files and directory by type"
   ([type]
@@ -279,6 +278,20 @@
                               :error      "Argument provided doesn't exist, try to specify if your search must be :full-text, :contains-every or :contains-any,
                         and specify what words are you looking for."})]
     search-query))
+
+(defn search-by-type
+  ([type]
+   (search (by-type type)))
+  ([type name]
+   (search (by-type type))))
+
+
+(defn search-by-content
+  [level & args]
+  (search (by-content level args)))
+
+
+
 
 ;(search nil)
 ;(search "asdasdas")

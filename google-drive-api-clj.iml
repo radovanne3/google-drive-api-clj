@@ -18,6 +18,7 @@
     <orderEntry type="inheritedJdk" />
     <orderEntry type="sourceFolder" forTests="false" />
     <orderEntry type="library" name="Leiningen: asm:3.1" level="project" />
+    <orderEntry type="library" name="Leiningen: cli-matic:0.4.3" level="project" />
     <orderEntry type="library" name="Leiningen: clj-tika:1.2.0" level="project" />
     <orderEntry type="library" name="Leiningen: clojure-complete:0.2.5" level="project" />
     <orderEntry type="library" name="Leiningen: com.drewnoakes/metadata-extractor:2.4.0-beta-1" level="project" />
@@ -45,6 +46,7 @@
     <orderEntry type="library" name="Leiningen: de.l3s.boilerpipe/boilerpipe:1.1.0" level="project" />
     <orderEntry type="library" name="Leiningen: dom4j:1.6.1" level="project" />
     <orderEntry type="library" name="Leiningen: edu.ucar/netcdf:4.2-min" level="project" />
+    <orderEntry type="library" name="Leiningen: expound:0.8.4" level="project" />
     <orderEntry type="library" name="Leiningen: io.grpc/grpc-context:1.27.2" level="project" />
     <orderEntry type="library" name="Leiningen: io.opencensus/opencensus-api:0.28.0" level="project" />
     <orderEntry type="library" name="Leiningen: io.opencensus/opencensus-contrib-http-util:0.28.0" level="project" />
