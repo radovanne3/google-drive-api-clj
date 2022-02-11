@@ -280,15 +280,6 @@
     search-query))
 
 
-
-
-(defn search-by-content
-  [level & args]
-  (search (by-content level args)))
-
-
-
-
 ;(search nil)
 ;(search "asdasdas")
 ;(search (by-type nil))
@@ -368,3 +359,44 @@
   "MOVE FILE"
   [_arguments]
   (println (move-file (:n _arguments) (:d _arguments))))
+
+;;Exception: #error {
+; :cause no conversion to symbol
+; :via
+; [{:type java.lang.IllegalArgumentException
+;   :message no conversion to symbol
+;   :at [clojure.core$symbol invokeStatic core.clj 598]}]
+(defn search-by-content
+  [_arguments]
+  (println (search (by-content (:l _arguments) (:c _arguments)))))
+
+(defn dload
+  "DOWNLOAD"
+  [{name :n :as _arguments}]
+  (println (download name)))
+
+(defn c-dir
+  "CREARE DIRECTORY"
+  [{name :n :as _arguments}]
+  (println (create-directory name)))
+
+(defn up-to-dir
+  "UPLOAD TO DIRECTPRY"
+  [_arguments]
+  (println (upload-to-directory (:d _arguments) (:n _arguments) (:p _arguments))))
+
+(defn upd-name
+  "UPDATE NAME"
+  [_arguments]
+  (println (update-name (:o _arguments) (:n _arguments))))
+
+
+
+
+
+
+
+
+
+
+
