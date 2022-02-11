@@ -1,8 +1,7 @@
 (ns google-drive-api-clj.actions
   (:require [google-drive-api-clj.constants :refer [drive-service]]
             [pantomime.mime :refer [mime-type-of]]
-            [clojure.java.io :as io]
-            [clojure.pprint :as p])
+            [clojure.java.io :as io])
   (:import (com.google.api.services.drive.model File)
            (com.google.api.client.http FileContent)
            (java.util Collections)))
@@ -76,10 +75,10 @@
     (let [file-path (java.io.File. path)
           mime-type (mime-type-of file-path)
           media-content (FileContent. mime-type file-path)
-          file-metadata (.setName (File.) name)
+          set-file-name (.setName (File.) name)
           file (-> drive-service
                    .files
-                   (.create file-metadata media-content)
+                   (.create set-file-name media-content)
                    (.setFields "id, name")
                    .execute)]
       {:success         true
@@ -195,7 +194,7 @@
 
 
 (defn search
-  "Search"
+  "Search files and folders"
   [command]
   (if (not (nil? command))
     (let [data (fn [condition]
@@ -225,8 +224,8 @@
     {:error-code :not-found
      :error      "Please provide valid criteria for searching.."}))
 
-(defn by-type
-  "Search files and directory by type"
+(defn search-by-type
+  "Supplement for search function"
   ([type]
    (let [search-query (cond
                         (= type "directories") (str "mimeType = 'application/vnd.google-apps.folder'")
@@ -242,8 +241,8 @@
                                :error      "Argument provided doesn't exist, try with files or directories"})]
      search-query)))
 
-(defn by-content
-  "Search files by content"
+(defn search-by-content
+  "Supplement for search function"
   [level args]
   (let [search-query (cond
                        (and (> (count args) 0) (= level :full-text)) (str "fullText contains " "'\"" (clojure.string/join " " args) "\"'")
@@ -290,59 +289,6 @@
 
 
 
-;; callings for cli-matic
-
-(defn del
-  [{name :n :as _arguments}]
-  "DELETE"
-  (p/pprint (delete name)))
-
-
-(defn search-by-type
-  ([{file-name :n :as _arguments}]
-   (if file-name
-     (p/pprint (search (by-type (:t _arguments) (:n _arguments))))
-     (p/pprint (search (by-type (:t _arguments)))))))
-
-(defn upl
-  "UPLOAD"
-  [_arguments]
-  (p/pprint (upload (:n _arguments) (:p _arguments))))
-
-(defn mo-fi
-  "MOVE FILE"
-  [_arguments]
-  (p/pprint (move-file (:n _arguments) (:d _arguments))))
-
-;;Exception: #error {
-; :cause no conversion to symbol
-; :via
-; [{:type java.lang.IllegalArgumentException
-;   :message no conversion to symbol
-;   :at [clojure.core$symbol invokeStatic core.clj 598]}]
-(defn search-by-content
-  [_arguments]
-  (p/pprint (search (by-content (:l _arguments) (:_arguments _arguments)))))
-
-(defn dload
-  "DOWNLOAD"
-  [{name :n :as _arguments}]
-  (p/pprint (download name)))
-
-(defn c-dir
-  "CREARE DIRECTORY"
-  [{name :n :as _arguments}]
-  (p/pprint (create-directory name)))
-
-(defn up-to-dir
-  "UPLOAD TO DIRECTPRY"
-  [_arguments]
-  (p/pprint (upload-to-directory (:d _arguments) (:n _arguments) (:p _arguments))))
-
-(defn upd-name
-  "UPDATE NAME"
-  [_arguments]
-  (p/pprint (update-name (:o _arguments) (:n _arguments))))
 
 
 

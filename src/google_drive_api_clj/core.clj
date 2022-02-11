@@ -1,5 +1,5 @@
 (ns google-drive-api-clj.core
-  (:require [google-drive-api-clj.actions :refer :all]
+  (:require [google-drive-api-clj.cli-matic :refer :all]
             [clojure.tools.cli :refer [parse-opts]]
             [cli-matic.core :refer [run-cmd]])
   (:gen-class)
@@ -54,7 +54,7 @@
                                                  {:as     ["Name of file you wish to move."]
                                                   :option "n"
                                                   :type   :string}]
-                                   :runs        upl}
+                                   :runs        upload}
                                   {:command     "update-name"
                                    :description "Updates a file name."
                                    :examples    ["update-name --o old-file-name --n name"]
@@ -64,7 +64,7 @@
                                                  {:as     ["New file name."]
                                                   :option "n"
                                                   :type   :string}]
-                                   :runs        upd-name}
+                                   :runs        update-name}
                                   {:command     "upload-to-directory"
                                    :description "Uploads a file to google drive directory."
                                    :examples    ["upload-to-directory --n name --d dir-name --p file-absolute-path"]
@@ -77,21 +77,21 @@
                                                  {:as     ["Name of directory you wish to upload file on."]
                                                   :option "d"
                                                   :type   :string}]
-                                   :runs        up-to-dir}
+                                   :runs        upload-to-directory}
                                   {:command     "download"
                                    :description "Downloads a file from google drive."
                                    :examples    ["download --n name"]
                                    :opts        [{:as     ["Name of file you wish to download."]
                                                   :option "n"
                                                   :type   :string}]
-                                   :runs        dload}
+                                   :runs        download}
                                   {:command     "create-directory"
                                    :description "Creates directory with a given name."
                                    :examples    ["create-directory --n name"]
                                    :opts        [{:as     ["Name you wish for directory to have."]
                                                   :option "n"
                                                   :type   :string}]
-                                   :runs        c-dir}
+                                   :runs        create-directory}
                                   {:command     "delete"
                                    :description "Deletes a file or directory,
                                    if directory is deleted all content is deleted too."
@@ -99,7 +99,7 @@
                                    :opts        [{:as     ["What is the name of a file or directory? "]
                                                   :type   :string
                                                   :option "n"}]
-                                   :runs        del}
+                                   :runs        delete}
                                   {:command     "move-file"
                                    :description "Moves a file from one directory to another.
                                    Requires file name and new directory name arguments"
@@ -110,7 +110,7 @@
                                                  {:as     ["Name of file you wish to move."]
                                                   :option "n"
                                                   :type   :string}]
-                                   :runs        mo-fi}
+                                   :runs        move-file}
                                   ]})
 
 
