@@ -280,8 +280,8 @@
     search-query))
 
 (defn search-by-type
-  ([type]
-   (search (by-type type)))
+  ([{type :t :as _arguments}]
+   (println (search (by-type type))))
   ([type name]
    (search (by-type type))))
 

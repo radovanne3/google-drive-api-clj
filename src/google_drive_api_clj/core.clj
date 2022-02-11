@@ -45,12 +45,12 @@
                                                            "Options are:"
                                                            "1. files"
                                                            "2. directories"]
-                                                  :option "a"
+                                                  :option "t"
                                                   :type   :string}
                                                  {:as     ["Name of file or directory."
                                                            "If this parameter is not supplied,"
                                                            "your search will be global for supplied type."]
-                                                  :option "b"
+                                                  :option "n"
                                                   :type   :string}]
                                    :runs        search-by-type}
                                   {:command     "delete"
