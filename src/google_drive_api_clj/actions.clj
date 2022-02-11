@@ -352,12 +352,12 @@
   "DELETE"
   (println (delete name)))
 
+
 (defn search-by-type
-  ([_arguments]
-   "SEARCH BY TYPE"
-   (case (:n _arguments)
-     nil (println (search (by-type (:t _arguments))))
-     (println (search (by-type (:t _arguments) (:n _arguments)))))))
+  ([{file-name :n :as _arguments}]
+   (if file-name
+     (println (search (by-type (:t _arguments) (:n _arguments))))
+     (println (search (by-type (:t _arguments)))))))
 
 (defn upl
   "UPLOAD"
