@@ -184,7 +184,8 @@
             (.get file-id)
             (.executeMediaAndDownloadTo output-stream)))
       {:success         true
-       :success-message (str "File named " name " is successfully downloaded")})
+       :success-message (str "File named " name " is successfully downloaded")
+       :result          {:downloaded-file-name name :output-path save-to-path}})
     {:error-code :not-found
      :error      "The name you provided doesn't match any directory or file."}))
 (get (get-metadata-by-name "name" :partial) "name")
