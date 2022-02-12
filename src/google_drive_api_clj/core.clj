@@ -79,9 +79,12 @@
                                    :runs        upload-to-directory}
                                   {:command     "download"
                                    :description "Downloads a file from google drive."
-                                   :examples    ["download --n name"]
+                                   :examples    ["download --n name --p save-to-path"]
                                    :opts        [{:as     ["Name of file you wish to download."]
                                                   :option "n"
+                                                  :type   :string}
+                                                 {:as     ["Absolute path to save the file to."]
+                                                  :option "p"
                                                   :type   :string}]
                                    :runs        download}
                                   {:command     "create-directory"

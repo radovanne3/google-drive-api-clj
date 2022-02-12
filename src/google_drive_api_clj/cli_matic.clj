@@ -38,8 +38,8 @@
 
 (defn download
   "DOWNLOAD"
-  [{name :n}]
-  (p/pprint (a/download name)))
+  [{name :n path :p}]
+  (p/pprint (a/download name path)))
 
 (defn create-directory
   "CREARE DIRECTORY"

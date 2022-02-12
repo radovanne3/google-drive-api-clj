@@ -11,7 +11,7 @@
 
 ;; HELPER FUNCTIONS
 
-(defn get-metadata-by-name
+(defn- get-metadata-by-name
   "Helper function for extracting ID from a Google Drive directory or a file.
   `match-type` parameter acceptable values: :partial (check GDA docs for .setQ operation 'contains')
   or :exact (check GDA docs for .setQ operation '=')"
@@ -49,7 +49,7 @@
     data))
 
 
-;; ACTION FUNCTIONS
+;; region ACTION FUNCTIONS
 
 (defn create-directory
   "Action function for creating a directory."
@@ -65,7 +65,8 @@
                           .execute)]
         {:success         true
          :success-message (format "Successfully created directory:\nID: %s\nNAME:  %s" (get directory "id")
-                                  (get directory "name"))}))
+                                  (get directory "name"))
+         :result          {:new-directory-name name}}))
     {:error      "You must provide a name for the new directory"
      :error-code :not-found}))
 
@@ -83,7 +84,8 @@
                    (.setFields "id, name")
                    .execute)]
       {:success         true
-       :success-message (format "File Name: %s / File ID: %s" (.getName file) (.getId file))})
+       :success-message (format "File Name: %s / File ID: %s" (.getName file) (.getId file))
+       :result          {:new-file-name (.getName file) :new-file-id (.getId file)}})
     {:error-code :not-found
      :error      "Please provide required arguments in this order:\nfile-name\nabsolute-path-to-the-file"}))
 
@@ -104,7 +106,8 @@
             {:success         true
              :success-message (if (= mime-type "application/vnd.google-apps.folder")
                                 (format "Directory's new name is %s\nID: %s" new-name id)
-                                (format "File's new name is %s\nID: %s" new-name id))})
+                                (format "File's new name is %s\nID: %s" new-name id))
+             :result          {:old-file-name old-name :new-file-name new-name}})
         {:error-code :not-found
          :error      "The name you provided doesn't match with any directory or file."}))
     {:error-code :not-found
@@ -132,7 +135,8 @@
                        .execute)]
           {:success         true
            :success-message (format "File  %s  is uploaded to %s." (.getName file) (get (get-data-using-id directory-id)
-                                                                                        "name"))}))
+                                                                                        "name"))
+           :result          {:directory-name directory-name :file-name file-name :local-file-path file-path}}))
       (do (create-directory directory-name)
           (upload-to-directory directory-name file-name file-path)
           {:success         true
@@ -156,7 +160,8 @@
                   (.delete file-id)
                   .execute)
               {:success         true
-               :success-message (format "Directory %s\nID %s is successfully deleted" name file-id)})
+               :success-message (format "Directory %s\nID %s is successfully deleted" name file-id)
+               :result          {:deleted-file-name name}})
           (do (-> drive-service
                   .files
                   (.delete file-id)
@@ -170,9 +175,9 @@
 
 
 (defn download
-  [name]
+  [name save-to-path]
   (if (string? (get (get-metadata-by-name name :exact) "id"))
-    (with-open [output-stream (io/output-stream name)]
+    (with-open [output-stream (io/output-stream save-to-path)]
       (let [file-id (get (get-metadata-by-name name :partial) "id")]
         (-> drive-service
             .files
@@ -290,3 +295,4 @@
          :result          {:new-file-name file-name}})
       {:error-code :not-found
        :error      "Argument (file name) or (new directory name) don't exist."})))
+;; endregion
