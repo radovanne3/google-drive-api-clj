@@ -13,8 +13,8 @@
 (defn search-by-type
   [{file-name :n type :t}]
   (if file-name
-    (p/pprint (a/search (a/search-by-type type file-name)))
-    (p/pprint (a/search (a/search-by-type type)))))
+    (p/pprint (a/search-by-type type file-name))
+    (p/pprint (a/search-by-type type))))
 
 (defn upload
   "UPLOAD"
@@ -34,7 +34,7 @@
 ;   :at [clojure.core$symbol invokeStatic core.clj 598]}]
 (defn search-by-content
   [{search-level :l :as arguments}]
-  (p/pprint (a/search (a/search-by-content search-level arguments))))
+  (p/pprint (a/search-by-content search-level arguments)))
 
 (defn download
   "DOWNLOAD"

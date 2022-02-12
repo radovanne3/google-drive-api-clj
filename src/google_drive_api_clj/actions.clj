@@ -234,14 +234,14 @@
                         (= type "files") (str "mimeType != 'application/vnd.google-apps.folder'")
                         :else {:error-code :not-found
                                :error      "Argument provided doesn't exist, try with files or directories"})]
-     search-query))
+     (search search-query)))
   ([type name]
    (let [search-query (cond
                         (= type "directories") (str "name = '" (symbol name) "' and mimeType = 'application/vnd.google-apps.folder'")
                         (= type "files") (str "name = '" (symbol name) "' and mimeType != 'application/vnd.google-apps.folder'")
                         :else {:error-code :not-found
                                :error      "Argument provided doesn't exist, try with files or directories"})]
-     search-query)))
+     (search search-query))))
 
 (defn search-by-content
   "Supplement for search function"
@@ -262,7 +262,7 @@
                               :error      (str "Argument provided doesn't exist, try to specify if your search should "
                                                "be :full-text, :contains-every or :contains-any, and specify which "
                                                "words you are looking for.")})]
-    search-query))
+    (search search-query)))
 
 
 
