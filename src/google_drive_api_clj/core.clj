@@ -2,18 +2,17 @@
   (:require [google-drive-api-clj.cli-matic :refer :all]
             [clojure.tools.cli :refer [parse-opts]]
             [cli-matic.core :refer [run-cmd]])
-  (:gen-class)
-  )
+  (:gen-class))
 
 (def configuration {:command     "google-drive-clj"
                     :description "A command-line application for working with Google Drive."
                     :version     "0.0.1"
                     :subcommands [{:command     "search-by-type"
                                    :description "Enters search state, must have
-                                   additional arguments."
-                                   :examples    ["search-by-tipe --t files"
-                                                 "search-by-tipe --t directories"
-                                                 "search-by-tipe --t (files or directories) --n (file or directory name)"]
+                                   additional arguments."   ; TODO: sta ovo znaci? Preformulisi.
+                                   :examples    ["search-by-type --t files"
+                                                 "search-by-type --t directories"
+                                                 "search-by-type --t (files or directories) --n (file or directory name)"]
                                    :opts        [{:as     ["What type are you searching for?"
                                                            "Options are:"
                                                            "1. files"
@@ -120,16 +119,3 @@
   Commands (functions) will be invoked as appropriate."
   [& args]
   (run-cmd args configuration))
-
-
-
-
-
-
-
-
-
-
-
-
-
