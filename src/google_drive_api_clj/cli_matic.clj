@@ -58,5 +58,5 @@
 
 (defn set-credentials-file-path!
   [{path :p}]
-  (set-credentials-file-path! path))
+  (a/set-credentials-file-path! path))
 ;; endregion
