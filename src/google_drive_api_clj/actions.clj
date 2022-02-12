@@ -88,7 +88,7 @@
      :error      "Please provide required arguments in this order:\nfile-name\nabsolute-path-to-the-file"}))
 
 
-(defn update-name
+(defn rename
   "Action function for changing metadata (name) of a file or directory"
   [old-name new-name]
   (if (string? new-name)
@@ -290,60 +290,3 @@
          :result          {:new-file-name file-name}})
       {:error-code :not-found
        :error      "Argument (file name) or (new directory name) don't exist."})))
-
-
-
-;; region callings for cli-matic
-
-(defn del
-  [{name :n}]
-  "DELETE"
-  (p/pprint (delete name)))
-
-
-(defn search-by-type
-  [{file-name :n type :t}]
-  (if file-name
-    (p/pprint (search (by-type type file-name)))
-    (p/pprint (search (by-type type)))))
-
-(defn upl
-  "UPLOAD"
-  [{file-name :n path :p}]
-  (p/pprint (upload file-name path)))
-
-(defn mo-fi
-  "MOVE FILE"
-  [{file-name :n directory-name :d}]
-  (p/pprint (move-file file-name directory-name)))
-
-;;Exception: #error {
-; :cause no conversion to symbol
-; :via
-; [{:type java.lang.IllegalArgumentException
-;   :message no conversion to symbol
-;   :at [clojure.core$symbol invokeStatic core.clj 598]}]
-(defn search-by-content
-  [{search-level :l :as arguments}]
-  (p/pprint (search (by-content search-level arguments))))
-
-(defn dload
-  "DOWNLOAD"
-  [{name :n}]
-  (p/pprint (download name)))
-
-(defn c-dir
-  "CREARE DIRECTORY"
-  [{file-name :n}]
-  (p/pprint (create-directory file-name)))
-
-(defn up-to-dir
-  "UPLOAD TO DIRECTPRY"
-  [{file-name :n directory-name :d path :p}]
-  (p/pprint (upload-to-directory directory-name file-name path)))
-
-(defn upd-name
-  "UPDATE NAME"
-  [{old-file-name :o new-file-name :n}]
-  (p/pprint (update-name old-file-name new-file-name)))
-;; endregion

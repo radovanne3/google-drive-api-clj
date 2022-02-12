@@ -2,43 +2,57 @@
   (:require [google-drive-api-clj.actions :as a]
             [clojure.pprint :as p]))
 
-;; callings for cli-matic
+;; region callings for cli-matic
 
 (defn delete
-  [{name :n :as _arguments}]
+  [{name :n}]
+  "DELETE"
   (p/pprint (a/delete name)))
 
-(defn search-by-type
-  ([{file-name :n :as _arguments}]
-   (if file-name
-     (p/pprint (a/search (a/search-by-type (:t _arguments) (:n _arguments))))
-     (p/pprint (a/search (a/search-by-type (:t _arguments)))))))
 
-(defn search-by-content
-  [_arguments]
-  (p/pprint (a/search (a/search-by-content (:l _arguments) (:_arguments _arguments)))))
+(defn search-by-type
+  [{file-name :n type :t}]
+  (if file-name
+    (p/pprint (a/search (a/search-by-type type file-name)))
+    (p/pprint (a/search (a/search-by-type type)))))
 
 (defn upload
-  [_arguments]
-  (p/pprint (a/upload (:n _arguments) (:p _arguments))))
+  "UPLOAD"
+  [{file-name :n path :p}]
+  (p/pprint (a/upload file-name path)))
 
 (defn move-file
-  [_arguments]
-  (p/pprint (a/move-file (:n _arguments) (:d _arguments))))
+  "MOVE FILE"
+  [{file-name :n directory-name :d}]
+  (p/pprint (a/move-file file-name directory-name)))
 
+;;Exception: #error {
+; :cause no conversion to symbol
+; :via
+; [{:type java.lang.IllegalArgumentException
+;   :message no conversion to symbol
+;   :at [clojure.core$symbol invokeStatic core.clj 598]}]
+(defn search-by-content
+  [{search-level :l :as arguments}]
+  (p/pprint (a/search (a/search-by-content search-level arguments))))
 
 (defn download
-  [{name :n :as _arguments}]
+  "DOWNLOAD"
+  [{name :n}]
   (p/pprint (a/download name)))
 
 (defn create-directory
-  [{name :n :as _arguments}]
-  (p/pprint (a/create-directory name)))
+  "CREARE DIRECTORY"
+  [{file-name :n}]
+  (p/pprint (a/create-directory file-name)))
 
 (defn upload-to-directory
-  [_arguments]
-  (p/pprint (a/upload-to-directory (:d _arguments) (:n _arguments) (:p _arguments))))
+  "UPLOAD TO DIRECTORY"
+  [{file-name :n directory-name :d path :p}]
+  (p/pprint (a/upload-to-directory directory-name file-name path)))
 
-(defn update-name
-  [_arguments]
-  (p/pprint (a/update-name (:o _arguments) (:n _arguments))))
+(defn rename
+  "UPDATE NAME"
+  [{old-file-name :o new-file-name :n}]
+  (p/pprint (a/rename old-file-name new-file-name)))
+;; endregion

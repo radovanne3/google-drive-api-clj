@@ -54,16 +54,16 @@
                                                   :option "n"
                                                   :type   :string}]
                                    :runs        upload}
-                                  {:command     "update-name"
+                                  {:command     "rename"
                                    :description "Updates a file name."
-                                   :examples    ["update-name --o old-file-name --n name"]
+                                   :examples    ["rename --o old-file-name --n name"]
                                    :opts        [{:as     ["Old name of the file."]
                                                   :option "o"
                                                   :type   :string}
                                                  {:as     ["New file name."]
                                                   :option "n"
                                                   :type   :string}]
-                                   :runs        update-name}
+                                   :runs        rename}
                                   {:command     "upload-to-directory"
                                    :description "Uploads a file to google drive directory."
                                    :examples    ["upload-to-directory --n name --d dir-name --p file-absolute-path"]
