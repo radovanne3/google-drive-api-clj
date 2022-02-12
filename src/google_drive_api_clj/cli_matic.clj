@@ -55,4 +55,8 @@
   "UPDATE NAME"
   [{old-file-name :o new-file-name :n}]
   (p/pprint (a/rename old-file-name new-file-name)))
+
+(defn set-credentials-file-path!
+  [{path :p}]
+  (set-credentials-file-path! path))
 ;; endregion

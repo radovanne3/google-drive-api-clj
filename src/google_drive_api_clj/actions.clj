@@ -2,8 +2,8 @@
   (:require [google-drive-api-clj.constants :refer [drive-service]]
             [pantomime.mime :refer [mime-type-of]]
             [clojure.java.io :as io]
-            [clojure.pprint :as p]
-            [clojure.string :as string])
+            [clojure.string :as string]
+            [google-drive-api-clj.constants :refer [credentials-file-path]])
   (:import (com.google.api.services.drive.model File)
            (com.google.api.client.http FileContent)
            (java.util Collections)))
@@ -21,7 +21,7 @@
                        :partial "contains"
                        :exact "="
                        "=")
-          found-data (-> drive-service
+          found-data (-> (drive-service)
                          .files
                          .list
                          (.setQ (str "name " match-type " '" (symbol name) "'"))
@@ -41,7 +41,7 @@
 (defn get-data-using-id
   "Gets data for a drive resource that matches the input id."
   [id]
-  (let [data (-> drive-service
+  (let [data (-> (drive-service)
                  .files
                  (.get id)
                  (.setFields "id, name, parents")
@@ -58,7 +58,7 @@
     (let [file-metadata (File.)]
       (.setName file-metadata name)
       (.setMimeType file-metadata "application/vnd.google-apps.folder")
-      (let [directory (-> drive-service
+      (let [directory (-> (drive-service)
                           .files
                           (.create file-metadata)
                           (.setFields "id, name")
@@ -78,7 +78,7 @@
           mime-type (mime-type-of file-path)
           media-content (FileContent. mime-type file-path)
           set-file-name (.setName (File.) name)
-          file (-> drive-service
+          file (-> (drive-service)
                    .files
                    (.create set-file-name media-content)
                    (.setFields "id, name")
@@ -99,7 +99,7 @@
           mime-type (get metadata "mimeType")
           file-metadata (.setName (File.) new-name)]
       (if (string? id)
-        (do (-> drive-service
+        (do (-> (drive-service)
                 .files
                 (.update id file-metadata)
                 .execute)
@@ -128,7 +128,7 @@
         (let [file-path (java.io.File. file-path)
               mime-type (mime-type-of file-path)
               media-content (FileContent. mime-type file-path)
-              file (-> drive-service
+              file (-> (drive-service)
                        .files
                        (.create file-metadata media-content)
                        (.setFields "id, name, parents")
@@ -155,14 +155,14 @@
           mime-type (get (get-metadata-by-name name :exact) "mimeType")]
       (if (string? file-id)
         (if (= mime-type "application/vnd.google-apps.folder")
-          (do (-> drive-service
+          (do (-> (drive-service)
                   .files
                   (.delete file-id)
                   .execute)
               {:success         true
                :success-message (format "Directory %s\nID %s is successfully deleted" name file-id)
                :result          {:deleted-file-name name}})
-          (do (-> drive-service
+          (do (-> (drive-service)
                   .files
                   (.delete file-id)
                   .execute)
@@ -179,7 +179,7 @@
   (if (string? (get (get-metadata-by-name name :exact) "id"))
     (with-open [output-stream (io/output-stream save-to-path)]
       (let [file-id (get (get-metadata-by-name name :partial) "id")]
-        (-> drive-service
+        (-> (drive-service)
             .files
             (.get file-id)
             (.executeMediaAndDownloadTo output-stream)))
@@ -196,7 +196,7 @@
   [command]
   (if (not (nil? command))
     (letfn [(get-data [condition]
-              (-> drive-service
+              (-> (drive-service)
                   .files
                   .list
                   (.setQ condition)
@@ -275,7 +275,7 @@
         directory-id (get (get-metadata-by-name new-dir-name :partial) "id")]
     (if (and (string? file-id) (string? directory-id))
       (let [previous-parents (StringBuilder.)
-            old-dir          (-> drive-service
+            old-dir          (-> (drive-service)
                                  .files
                                  (.get file-id)
                                  (.setFields "parents")
@@ -284,7 +284,7 @@
                (.append previous-parents parent)
                (.append previous-parents ","))
              (.getParents old-dir))
-        (-> drive-service
+        (-> (drive-service)
             .files
             (.update file-id nil)
             (.setAddParents directory-id)
@@ -297,3 +297,9 @@
       {:error-code :not-found
        :error      "Argument (file name) or (new directory name) don't exist."})))
 ;; endregion
+
+;; app setup
+
+(defn set-credentials-file-path!
+  [path-to-credentials]
+  (reset! credentials-file-path path-to-credentials))

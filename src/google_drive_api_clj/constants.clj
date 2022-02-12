@@ -15,7 +15,7 @@
 
 (defonce ^DriveScopes scopes (DriveScopes/DRIVE))
 
-(def credentials-file-path "resources/credentials.json")
+(def credentials-file-path (atom "resources/credentials.json"))
 
 (defonce ^GoogleNetHttpTransport http-transport (GoogleNetHttpTransport/newTrustedTransport))
 
@@ -24,15 +24,21 @@
   (.createScoped credentials (list scopes)))
 
 (defn default-credential
-  ([scopes]
-   (credential-with-scopes (ServiceAccountCredentials/fromStream (new FileInputStream credentials-file-path)) scopes)))
+  [scopes]
+  (credential-with-scopes (ServiceAccountCredentials/fromStream (new FileInputStream @credentials-file-path)) scopes))
 
-(def ^HttpCredentialsAdapter request-initializer (HttpCredentialsAdapter. (default-credential scopes)))
+(defn ^HttpCredentialsAdapter request-initializer
+  []
+  (HttpCredentialsAdapter. (default-credential scopes)))
 
-(def ^Drive drive-service
-  (-> (Drive$Builder. http-transport json-factory request-initializer)
-      (.setApplicationName application-name)
-      .build))
+(defn ^Drive drive-service
+  []
+  (try (-> (Drive$Builder. http-transport json-factory (request-initializer))
+           (.setApplicationName application-name)
+           .build)
+       (catch Exception e (throw (Exception. (str "Path to credentials file did not resolve to proper credential."
+                                                  " Please set the path to a proper credentials JSON file."
+                                                  "Root exception: " (ex-message e)))))))
 
 
 

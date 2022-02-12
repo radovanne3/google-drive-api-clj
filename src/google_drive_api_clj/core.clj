@@ -113,8 +113,14 @@
                                                   :option "n"
                                                   :type   :string}]
                                    :runs        move-file}
-                                  ]})
-
+                                  {:command     "delete"
+                                   :description "Deletes a file or directory,
+                                   if directory is deleted all content is deleted too."
+                                   :examples    ["delete --n name-of-file-or-dir"]
+                                   :opts        [{:as     ["What is the name of a file or directory? "]
+                                                  :type   :string
+                                                  :option "n"}]
+                                   :runs        set-credentials-file-path!}]})
 
 (defn -main
   "This is our entry point.
