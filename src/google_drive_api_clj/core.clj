@@ -8,8 +8,11 @@
                     :description "A command-line application for working with Google Drive."
                     :version     "0.0.1"
                     :subcommands [{:command     "search-by-type"
-                                   :description "Enters search state, must have
-                                   additional arguments."   ; TODO: sta ovo znaci? Preformulisi.
+                                   :description "This command initiates search by type, types can be
+                                   'files' or 'directories', you can be even more specific and add file or
+                                   directory name that you want to search for. If name is not provided as argument,
+                                   search will be global and return all files or directories that exist in
+                                   \"Shared Google Drive\" "
                                    :examples    ["search-by-type --t files"
                                                  "search-by-type --t directories"
                                                  "search-by-type --t (files or directories) --n (file or directory name)"]
@@ -26,9 +29,12 @@
                                                   :type   :string}]
                                    :runs        search-by-type}
                                   {:command     "search-by-content"
-                                   :description "Enters search state, must have
-                                   additional arguments."
-                                   :examples    ["search-by-content --l level This is some text"
+                                   :description "This command initiates search by content, you can specify level of search.
+                                   There are three levels of search:
+                                   1. full-text -> File must contain supplied words in that order, like a sentence
+                                   2. contains-any -> File must contain any of supplied words, order is not important.
+                                   3. contains-every -> File must contain every of supplied words, order is not important."
+                                   :examples    ["search-by-content --l contains-any This is some text"
                                                  ""
                                                  ":example search-by-content --l contains-any Some text or group of words"
                                                  ""
@@ -64,6 +70,26 @@
                                                   :option "n"
                                                   :type   :string}]
                                    :runs        rename}
+                                  {:command     "update-description"
+                                   :description "Updates a file metadata description."
+                                   :examples    ["update-metadata --n file-name "]
+                                   :opts        [{:as     ["Name of file you wish to update."]
+                                                  :option "n"
+                                                  :type   :string}]
+                                   :runs        update-description}
+                                  {:command     "update-properties"
+                                   :description "Updates a file metadata appProperties.
+                                   appProperties are key value pairs that give additional information about your files.
+                                   When you use this function be careful.
+                                    key you provide will be searched for, if it doesn't exist it will be created with value you provide,
+                                    if it exists new value will be added to that key..
+                                    There are some rules for this operation, before you use it we advise that you look at rules..
+                                    URL: https://developers.google.com/drive/api/v3/properties"
+                                   :examples    ["update-properties --n file-name key value key value key value"]
+                                   :opts        [{:as     ["Name of file you wish to update."]
+                                                  :option "n"
+                                                  :type   :string}]
+                                   :runs        update-properties}
                                   {:command     "upload-to-directory"
                                    :description "Uploads a file to google drive directory."
                                    :examples    ["upload-to-directory --n name --d dir-name --p file-absolute-path"]
@@ -113,13 +139,14 @@
                                                   :option "n"
                                                   :type   :string}]
                                    :runs        move-file}
-                                  {:command     "delete"
-                                   :description "Deletes a file or directory,
-                                   if directory is deleted all content is deleted too."
-                                   :examples    ["delete --n name-of-file-or-dir"]
-                                   :opts        [{:as     ["What is the name of a file or directory? "]
+                                  {:command     "set-credentials-file-path"
+                                   :description "Sets a credentials file path to your credentials.json
+                                   file. For this to work your credentials.json must be in your new path already, if not
+                                   you will need to set it up manually before running app again!!!"
+                                   :examples    ["set-credentials-file-path --p /home/user/.config/credentials.json"]
+                                   :opts        [{:as     ["Absolute path to your credentials.json file "]
                                                   :type   :string
-                                                  :option "n"}]
+                                                  :option "p"}]
                                    :runs        set-credentials-file-path!}]})
 
 (defn -main

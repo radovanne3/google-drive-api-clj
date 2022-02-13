@@ -26,14 +26,9 @@
   [{file-name :n directory-name :d}]
   (p/pprint (a/move-file file-name directory-name)))
 
-;;Exception: #error {
-; :cause no conversion to symbol
-; :via
-; [{:type java.lang.IllegalArgumentException
-;   :message no conversion to symbol
-;   :at [clojure.core$symbol invokeStatic core.clj 598]}]
+
 (defn search-by-content
-  [{search-level :l :as arguments}]
+  [{search-level :l arguments :_arguments}]
   (p/pprint (a/search-by-content search-level arguments)))
 
 (defn download
@@ -42,7 +37,7 @@
   (p/pprint (a/download name path)))
 
 (defn create-directory
-  "CREARE DIRECTORY"
+  "CREATE DIRECTORY"
   [{file-name :n}]
   (p/pprint (a/create-directory file-name)))
 
@@ -55,6 +50,16 @@
   "UPDATE NAME"
   [{old-file-name :o new-file-name :n}]
   (p/pprint (a/rename old-file-name new-file-name)))
+
+(defn update-description
+  "UPDATE DESCRIPTION"
+  [{file-name :n arguments :_arguments}]
+  (p/pprint (a/update-description file-name arguments)))
+
+(defn update-properties
+  "UPDATE DESCRIPTION"
+  [{file-name :n arguments :_arguments}]
+  (p/pprint (a/update-properties file-name arguments)))
 
 (defn set-credentials-file-path!
   [{path :p}]

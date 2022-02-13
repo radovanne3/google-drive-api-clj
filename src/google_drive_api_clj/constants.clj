@@ -40,19 +40,3 @@
                                                   " Please set the path to a proper credentials JSON file."
                                                   "Root exception: " (ex-message e)))))))
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

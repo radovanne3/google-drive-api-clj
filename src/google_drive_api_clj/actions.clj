@@ -95,9 +95,10 @@
   [old-name new-name]
   (if (string? new-name)
     (let [metadata (get-metadata-by-name old-name :exact)
+          file-metadata (.setName (File.) new-name)
           id (get metadata "id")
           mime-type (get metadata "mimeType")
-          file-metadata (.setName (File.) new-name)]
+          ]
       (if (string? id)
         (do (-> (drive-service)
                 .files
@@ -201,7 +202,7 @@
                   .list
                   (.setQ condition)
                   (.setSpaces "drive")
-                  (.setFields "nextPageToken, files(id, name, mimeType)")
+                  (.setFields "nextPageToken, files(id, name, mimeType, description)")
                   (.setPageToken nil)
                   .execute
                   .getFiles))
@@ -215,9 +216,10 @@
                    :error      "No data was found."}
                   {:success         true
                    :success-message (map (fn [x]
-                                           (format "%s name: %s / %s ID: %s ..."
+                                           (format "%s name: %s / %s ID: %s / description: %s..."
                                                    (string/capitalize (type (.getMimeType x))) (.getName x)
-                                                   (string/capitalize (type (.getMimeType x))) (.getId x)))
+                                                   (string/capitalize (type (.getMimeType x))) (.getId x)
+                                                   (.getDescription x)))
                                          data)
                    :result          data})))]
       (if (string? command)
@@ -296,6 +298,60 @@
          :result          {:new-file-name file-name}})
       {:error-code :not-found
        :error      "Argument (file name) or (new directory name) don't exist."})))
+
+(defn update-description
+  "Function for updating metadata of a file"
+  [name args]
+  (if (string? name)
+    (let [metadata (get-metadata-by-name name :exact)
+          description (string/join " " args)
+          file-metadata (.setDescription (File.) description)
+          id (get metadata "id")
+          mime-type (get metadata "mimeType")
+          ]
+      (if (string? id)
+        (do (-> (drive-service)
+                .files
+                (.update id file-metadata)
+                .execute)
+            {:success         true
+             :success-message (if (= mime-type "application/vnd.google-apps.folder")
+                                (format "Directory's metadata/description is updated to: %s" description)
+                                (format "File's metadata/description is updated to: %s" description))
+             :result          {:file-description description}})
+        {:error-code :not-found
+         :error      "The name you provided doesn't match with any directory or file."}))
+    {:error-code :not-found
+     :error      "Please provide valid description."})
+  )
+
+
+#_(defn update-properties
+  "Function for updating metadata of a file"
+  [name args]
+  (if (string? name)
+    (let [metadata (get-metadata-by-name name :exact)
+          file-metadata (File.)
+          id (get metadata "id")
+          mime-type (get metadata "mimeType")
+          properties (string/join " " args)
+          ]
+      (if (string? id)
+        (do (.setAppProperties (File.) properties)
+            (-> (drive-service)
+                .files
+                (.update id file-metadata)
+                .execute)
+            {:success         true
+             :success-message (if (= mime-type "application/vnd.google-apps.folder")
+                                (format "Directory's metadata/appProperties is updated to: %s" properties)
+                                (format "File's metadata/appProperties is updated to: %s" properties))
+             :result          {:updated-properties properties}})
+        {:error-code :not-found
+         :error      "The name you provided doesn't match with any directory or file."}))
+    {:error-code :not-found
+     :error      "Please provide valid properties."})
+  )
 ;; endregion
 
 ;; app setup
