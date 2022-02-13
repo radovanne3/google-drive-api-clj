@@ -61,7 +61,11 @@
   [{file-name :n arguments :_arguments}]
   (p/pprint (a/update-properties file-name arguments)))
 
-(defn set-credentials-file-path!
-  [{path :p}]
-  (a/set-credentials-file-path! path))
+(defn add-credentials-wrapper
+  "Used to update path to credentials file before calling any command through the CLI."
+  [target-function]
+  (fn [{credentials-file-path :cfp :as arguments}]
+    (when credentials-file-path
+      (a/set-credentials-file-path! credentials-file-path))
+    (target-function arguments)))
 ;; endregion

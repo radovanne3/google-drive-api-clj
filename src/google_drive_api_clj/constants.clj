@@ -38,5 +38,5 @@
            .build)
        (catch Exception e (throw (Exception. (str "Path to credentials file did not resolve to proper credential."
                                                   " Please set the path to a proper credentials JSON file."
-                                                  "Root exception: " (ex-message e)))))))
+                                                  " Root exception: " (ex-message e)))))))
 

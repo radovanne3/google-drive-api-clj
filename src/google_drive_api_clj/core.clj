@@ -7,6 +7,9 @@
 (def configuration {:command     "google-drive-clj"
                     :description "A command-line application for working with Google Drive."
                     :version     "0.0.1"
+                    :opts        [{:as     ["Path to credentials.json file."]
+                                   :option "cfp"
+                                   :type   :string}]
                     :subcommands [{:command     "search-by-type"
                                    :description "This command initiates search by type, types can be
                                    'files' or 'directories', you can be even more specific and add file or
@@ -27,7 +30,7 @@
                                                            "your search will be global for supplied type."]
                                                   :option "n"
                                                   :type   :string}]
-                                   :runs        search-by-type}
+                                   :runs        (add-credentials-wrapper search-by-type)}
                                   {:command     "search-by-content"
                                    :description "This command initiates search by content, you can specify level of search.
                                    There are three levels of search:
@@ -49,7 +52,7 @@
                                                            "3. contains-every"]
                                                   :option "l"
                                                   :type   :keyword}]
-                                   :runs        search-by-content}
+                                   :runs        (add-credentials-wrapper search-by-content)}
                                   {:command     "upload"
                                    :description "Uploads a file to google drive."
                                    :examples    ["upload --n name --p absolute-path"]
@@ -59,7 +62,7 @@
                                                  {:as     ["Name of file you wish to move."]
                                                   :option "n"
                                                   :type   :string}]
-                                   :runs        upload}
+                                   :runs        (add-credentials-wrapper upload)}
                                   {:command     "rename"
                                    :description "Updates a file name."
                                    :examples    ["rename --o old-file-name --n name"]
@@ -69,18 +72,19 @@
                                                  {:as     ["New file name."]
                                                   :option "n"
                                                   :type   :string}]
-                                   :runs        rename}
+                                   :runs        (add-credentials-wrapper rename)}
                                   {:command     "update-description"
                                    :description "Updates a file metadata description."
                                    :examples    ["update-metadata --n file-name "]
                                    :opts        [{:as     ["Name of file you wish to update."]
                                                   :option "n"
                                                   :type   :string}]
-                                   :runs        update-description}
+                                   :runs        (add-credentials-wrapper update-description)}
                                   {:command     "update-properties"
                                    :description "Updates a file metadata appProperties.
                                    appProperties are key value pairs that give additional information about your files.
-                                   When you use this function be careful.
+                                   When you use this function be careful. This update will overwrite existing
+                                   appProperties of the file.
                                     key you provide will be searched for, if it doesn't exist it will be created with value you provide,
                                     if it exists new value will be added to that key..
                                     There are some rules for this operation, before you use it we advise that you look at rules..
@@ -89,7 +93,7 @@
                                    :opts        [{:as     ["Name of file you wish to update."]
                                                   :option "n"
                                                   :type   :string}]
-                                   :runs        update-properties}
+                                   :runs        (add-credentials-wrapper update-properties)}
                                   {:command     "upload-to-directory"
                                    :description "Uploads a file to google drive directory."
                                    :examples    ["upload-to-directory --n name --d dir-name --p file-absolute-path"]
@@ -102,7 +106,7 @@
                                                  {:as     ["Name of directory you wish to upload file on."]
                                                   :option "d"
                                                   :type   :string}]
-                                   :runs        upload-to-directory}
+                                   :runs        (add-credentials-wrapper upload-to-directory)}
                                   {:command     "download"
                                    :description "Downloads a file from google drive."
                                    :examples    ["download --n name --p save-to-path"]
@@ -112,14 +116,14 @@
                                                  {:as     ["Absolute path to save the file to."]
                                                   :option "p"
                                                   :type   :string}]
-                                   :runs        download}
+                                   :runs        (add-credentials-wrapper download)}
                                   {:command     "create-directory"
                                    :description "Creates directory with a given name."
                                    :examples    ["create-directory --n name"]
                                    :opts        [{:as     ["Name you wish for directory to have."]
                                                   :option "n"
                                                   :type   :string}]
-                                   :runs        create-directory}
+                                   :runs        (add-credentials-wrapper create-directory)}
                                   {:command     "delete"
                                    :description "Deletes a file or directory,
                                    if directory is deleted all content is deleted too."
@@ -127,7 +131,7 @@
                                    :opts        [{:as     ["What is the name of a file or directory? "]
                                                   :type   :string
                                                   :option "n"}]
-                                   :runs        delete}
+                                   :runs        (add-credentials-wrapper delete)}
                                   {:command     "move-file"
                                    :description "Moves a file from one directory to another.
                                    Requires file name and new directory name arguments"
@@ -138,16 +142,7 @@
                                                  {:as     ["Name of file you wish to move."]
                                                   :option "n"
                                                   :type   :string}]
-                                   :runs        move-file}
-                                  {:command     "set-credentials-file-path"
-                                   :description "Sets a credentials file path to your credentials.json
-                                   file. For this to work your credentials.json must be in your new path already, if not
-                                   you will need to set it up manually before running app again!!!"
-                                   :examples    ["set-credentials-file-path --p /home/user/.config/credentials.json"]
-                                   :opts        [{:as     ["Absolute path to your credentials.json file "]
-                                                  :type   :string
-                                                  :option "p"}]
-                                   :runs        set-credentials-file-path!}]})
+                                   :runs        (add-credentials-wrapper move-file)}]})
 
 (defn -main
   "This is our entry point.

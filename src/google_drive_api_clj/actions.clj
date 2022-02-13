@@ -195,7 +195,7 @@
 (defn search
   "Search files and folders"
   [command]
-  (if (not (nil? command))
+  (if (some? command)
     (letfn [(get-data [condition]
               (-> (drive-service)
                   .files
@@ -322,36 +322,34 @@
         {:error-code :not-found
          :error      "The name you provided doesn't match with any directory or file."}))
     {:error-code :not-found
-     :error      "Please provide valid description."})
-  )
+     :error      "Please provide valid description."}))
 
 
-#_(defn update-properties
+(defn update-properties
   "Function for updating metadata of a file"
   [name args]
   (if (string? name)
     (let [metadata (get-metadata-by-name name :exact)
-          file-metadata (File.)
           id (get metadata "id")
           mime-type (get metadata "mimeType")
           properties (string/join " " args)
-          ]
+          app-properties-map (into {} (map vec) (partition 2 args))
+          file-metadata (.setAppProperties (File.) app-properties-map)]
       (if (string? id)
-        (do (.setAppProperties (File.) properties)
-            (-> (drive-service)
-                .files
-                (.update id file-metadata)
-                .execute)
-            {:success         true
-             :success-message (if (= mime-type "application/vnd.google-apps.folder")
-                                (format "Directory's metadata/appProperties is updated to: %s" properties)
-                                (format "File's metadata/appProperties is updated to: %s" properties))
-             :result          {:updated-properties properties}})
+        (do
+          (-> (drive-service)
+              .files
+              (.update id file-metadata)
+              .execute)
+          {:success         true
+           :success-message (if (= mime-type "application/vnd.google-apps.folder")
+                              (format "Directory's metadata/appProperties is updated to: %s" properties)
+                              (format "File's metadata/appProperties is updated to: %s" properties))
+           :result          {:updated-properties app-properties-map}})
         {:error-code :not-found
          :error      "The name you provided doesn't match with any directory or file."}))
     {:error-code :not-found
-     :error      "Please provide valid properties."})
-  )
+     :error      "Please provide valid properties."}))
 ;; endregion
 
 ;; app setup
