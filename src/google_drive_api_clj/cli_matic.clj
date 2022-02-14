@@ -57,7 +57,7 @@
   (p/pprint (a/update-description file-name arguments)))
 
 (defn update-properties
-  "UPDATE DESCRIPTION"
+  "UPDATE appProperties"
   [{file-name :n arguments :_arguments}]
   (p/pprint (a/update-properties file-name arguments)))
 

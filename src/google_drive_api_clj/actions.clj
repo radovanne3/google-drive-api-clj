@@ -202,7 +202,7 @@
                   .list
                   (.setQ condition)
                   (.setSpaces "drive")
-                  (.setFields "nextPageToken, files(id, name, mimeType, description)")
+                  (.setFields "nextPageToken, files(id, name, mimeType, description, appProperties)")
                   (.setPageToken nil)
                   .execute
                   .getFiles))
@@ -216,10 +216,10 @@
                    :error      "No data was found."}
                   {:success         true
                    :success-message (map (fn [x]
-                                           (format "%s name: %s / %s ID: %s / description: %s..."
+                                           (format "%s name: %s / %s ID: %s / description: %s / appProperties: %s..."
                                                    (string/capitalize (type (.getMimeType x))) (.getName x)
                                                    (string/capitalize (type (.getMimeType x))) (.getId x)
-                                                   (.getDescription x)))
+                                                   (.getDescription x) (.getAppProperties x)))
                                          data)
                    :result          data})))]
       (if (string? command)
