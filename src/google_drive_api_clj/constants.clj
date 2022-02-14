@@ -14,7 +14,7 @@
 
 (defonce ^DriveScopes scopes (DriveScopes/DRIVE))
 
-(def credentials-file-path (atom "resources/credentials.json"))
+(def credentials-file-path (atom (System/getenv "GOOGLE_DRIVE_CREDENTIALS_ABSOLUTE_PATH")))
 
 (defonce ^GoogleNetHttpTransport http-transport (GoogleNetHttpTransport/newTrustedTransport))
 

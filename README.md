@@ -13,6 +13,10 @@ Details on application arguments can be found in the help section of the CLI by 
 `java -jar google-drive-api-clj-0.1.0-standalone.jar --cfp <path_to_credentials.json_file> <subcommand> 
 [--<subcommand_flag_argument>] [<subcommand_positional_argument]`
 
+`cfp` stands for `credentials-file-path` and we can use it to specify path to the credentials.json file 
+each time when we invoke a command. Alternatively, we can set the `GOOGLE_DRIVE_CREDENTIALS_ABSOLUTE_PATH`
+environment variable and path to credentials file will be taken from its value.
+
 ## Options
 
 Here we will list all functionalities this application has to offer:
