@@ -16,11 +16,7 @@
                  [org.slf4j/slf4j-jdk14 "2.0.0-alpha6"]
                  ;; required deps for CLI-MATIC (command parsing library)
                  [cli-matic "0.4.3"]
-                 [org.clojure/tools.cli "1.0.206"]
-                 ]
-  ;; Prevent Leiningen from checking the network for dependencies.
-  ;; This wouldn't normally be set in project.clj; it would come from a profile.
-  :offline? true
+                 [org.clojure/tools.cli "1.0.206"]]
   :main ^:skip-aot google-drive-api-clj.core
   :target-path "target/%s"
   :profiles {:uberjar {:aot :all

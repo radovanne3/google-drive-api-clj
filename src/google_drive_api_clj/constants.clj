@@ -6,8 +6,7 @@
     (com.google.auth.http HttpCredentialsAdapter)
     (com.google.auth.oauth2 ServiceAccountCredentials)
     (java.io FileInputStream)
-    (com.google.api.client.json JsonFactory)
-    ))
+    (com.google.api.client.json JsonFactory)))
 
 (defonce application-name "Google Drive Api")
 

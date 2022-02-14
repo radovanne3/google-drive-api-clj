@@ -189,8 +189,6 @@
        :result          {:downloaded-file-name name :output-path save-to-path}})
     {:error-code :not-found
      :error      "The name you provided doesn't match any directory or file."}))
-(get (get-metadata-by-name "name" :partial) "name")
-
 
 (defn search
   "Search files and folders"
